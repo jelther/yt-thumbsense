@@ -1,0 +1,42 @@
+services:
+  api:
+    container_name: yt_thumbsense_api_production
+    hostname: api
+    ports:
+      - "8081:8080"
+    environment:
+      - MONGODB_URI=mongodb://admin:password@db:27017/yt_thumbsense?authSource=admin
+      - MONGODB_DB=yt_thumbsense
+      - REDIS_URL=redis://redis:6379
+      - LIBRETRANSLATE_URL=http://libretranslate:5000/
+
+  worker:
+    hostname: worker
+    deploy:
+      replicas: 4
+    environment:
+      - MONGODB_URI=mongodb://admin:password@db:27017/yt_thumbsense?authSource=admin
+      - MONGODB_DB=yt_thumbsense
+      - REDIS_URL=redis://redis:6379
+      - LIBRETRANSLATE_URL=http://libretranslate:5000/
+
+  db:
+    container_name: yt_thumbsense_db_production
+    hostname: db
+    ports:
+      - "27017:27017"
+
+  redis:
+    container_name: yt_thumbsense_redis_production
+    hostname: redis
+    ports:
+      - "6379:6379"
+
+  libretranslate:
+    container_name: yt_thumbsense_libretranslate_production
+    hostname: libretranslate
+    environment:
+      - LT_LOAD_ONLY=en,pt
+    ports:
+      - "5000:5000"
+

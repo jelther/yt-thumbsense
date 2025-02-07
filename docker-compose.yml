@@ -1,0 +1,136 @@
+services:
+  api:
+    profiles:
+      - production
+    build:
+      context: .
+      dockerfile: Dockerfile
+    hostname: api
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      libretranslate:
+        condition: service_healthy
+    environment:
+      - MONGODB_URI=mongodb://admin:password@db:27017
+      - MONGODB_DB=yt_thumbsense
+      - REDIS_URL=redis://redis:6379
+      - LIBRETRANSLATE_URL=http://libretranslate:5000/
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: 1G
+
+  worker:
+    profiles:
+      - production
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: rq worker main --with-scheduler
+    hostname: worker
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      libretranslate:
+        condition: service_healthy
+    environment:
+      - MONGODB_URI=mongodb://admin:password@db:27017
+      - MONGODB_DB=yt_thumbsense
+      - REDIS_URL=redis://redis:6379
+      - LIBRETRANSLATE_URL=http://libretranslate:5000/
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "pgrep", "-f", "rq worker"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: 1G
+
+  db:
+    profiles:
+      - production
+      - testing
+      - local
+    image: mongo:latest
+    hostname: db
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: password
+    volumes:
+      - mongodb_data:/data/db
+      - mongodb_config:/data/configdb
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: '2'
+          memory: 2G
+
+  redis:
+    profiles:
+      - production
+      - testing
+      - local
+    image: redis:latest
+    hostname: redis
+    volumes:
+      - redis_data:/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
+
+  libretranslate:
+    profiles:
+      - production
+      - local
+    image: libretranslate/libretranslate:latest
+    hostname: libretranslate
+    tty: true
+    volumes:
+      - libretranslate_models:/home/libretranslate/.local:rw
+    healthcheck:
+      test: ["CMD-SHELL", "./venv/bin/python scripts/healthcheck.py"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: 1G
+
+volumes:
+  mongodb_data:
+  mongodb_config:
+  redis_data:
+  libretranslate_models:

@@ -1,0 +1,75 @@
+[project]
+name = "yt-thumbsense"
+version = "0.0.0"
+description = "An AI-powered YouTube API that predicts likes/dislikes ratios through comment sentiment analysis."
+authors = [
+    {name = "Jelther Goncalves", email = "hello@jelther.dev"},
+]
+dependencies = [
+    "python-dotenv>=1.0.1",
+    "loguru>=0.7.3",
+    "libretranslatepy>=2.1.4",
+    "youtube-comment-downloader>=0.1.76",
+    "fastapi[all]>=0.115.8",
+    "motor>=3.7.0",
+    "rq>=2.1.0",
+    "rq-scheduler>=0.14.0",
+    "redis>=5.2.1",
+    "pytube>=15.0.0",
+    "dateparser>=1.2.0",
+    "vaderSentiment>=3.3.2",
+    "pandas>=2.2.3",
+    "slowapi>=0.1.9"
+]
+requires-python = ">=3.13"
+readme = "README.md"
+license = {text = "GPL-3.0 license"}
+
+[build-system]
+requires = ["pdm-backend"]
+build-backend = "pdm.backend"
+
+[tool.black]
+line-length = 88
+target-version = ['py313']
+
+[tool.isort]
+profile = "black"
+
+[tool.pdm]
+distribution = true
+
+[tool.pdm.scripts]
+fmt = "black src/ tests/"
+fmt-check = "black --check src/"
+lint = "ruff check --fix src/"
+lint-check = "ruff check src/"
+security-check = "bandit -r src/"
+type-check = "mypy --ignore-missing-imports --check-untyped-defs src/"
+sort-imports = "isort src/ tests/"
+sort-imports-check = "isort src/ --check"
+all-checks = {composite = ["fmt-check", "lint-check", "security-check", "sort-imports-check", "type-check"]}
+all-fix = {composite = ["fmt", "lint", "sort-imports"]}
+test = "pytest tests/"
+cov = "pytest --cov=src --cov-report html tests/ "
+tox = "tox run-parallel -v"
+
+[dependency-groups]
+dev = [
+    "pytest>=8.3.4",
+    "pytest-mock>=3.14.0",
+    "black>=24.10.0",
+    "pytest-cov>=6.0.0",
+    "ruff>=0.9.2",
+    "bandit>=1.8.2",
+    "mypy>=1.14.1",
+    "isort>=5.13.2",
+    "tox-pdm>=0.7.2",
+    "httpx>=0.28.1",
+    "pytest-docker>=3.1.1",
+    "mongomock>=4.3.0",
+    "pytest-asyncio>=0.25.3",
+    "mongomock-motor>=0.0.35",
+    "freezegun>=1.5.1",
+    "types-dateparser>=1.2.0.20240420",
+]

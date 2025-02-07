@@ -1,0 +1,20 @@
+services:
+  db:
+    container_name: yt_thumbsense_db_local
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: password
+    ports:
+      - "27019:27017"
+
+  redis:
+    container_name: yt_thumbsense_db_redis
+    ports:
+      - "6381:6379"
+
+  libretranslate:
+    container_name: yt_thumbsense_db_libretranslate
+    environment:
+      - LT_LOAD_ONLY=en,pt
+    ports:
+      - "6000:5000"

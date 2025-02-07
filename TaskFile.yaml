@@ -1,0 +1,20 @@
+version: '3'
+
+tasks:
+  rm-local:
+    cmds:
+        - docker compose -f docker-compose.yml -f docker-compose.local.yml --profile local --project-name yt-thumbsense-local down -v
+
+  start-local:
+    cmds:
+      - task: rm-local
+      - docker compose -f docker-compose.yml -f docker-compose.local.yml --profile local --project-name yt-thumbsense-local up --build --remove-orphans
+
+  rm-production:
+    cmds:
+      - docker compose -f docker-compose.yml -f docker-compose.production.yml --profile production --project-name yt-thumbsense-production down -v
+
+  start-production:
+    cmds:
+      - task: rm-production
+      - docker compose -f docker-compose.yml -f docker-compose.production.yml --profile production --project-name yt-thumbsense-production up --build --remove-orphans

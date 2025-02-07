@@ -1,0 +1,14 @@
+services:
+  db:
+    container_name: yt_thumbsense_db_testing
+    ports:
+      - "27018:27017"
+
+  redis:
+    container_name: yt_thumbsense_redis_testing
+    ports:
+      - "6380:6379"
+
+  libretranslate:
+    environment:
+      - LT_LOAD_ONLY=en,pt
